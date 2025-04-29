@@ -123,7 +123,7 @@ navbarPage( # UI ####
                   card_body(
                       plotOutput(outputId = "TotalKillsByTeam", width = "100%"),
                       style = "display: flex; justify-content: center; align-items: center; padding: 0px; overflow: hidden; box-sizing: border-box;"
-                  ) 
+                  )
               ),
               card(
                   height = 100,
@@ -131,9 +131,9 @@ navbarPage( # UI ####
                   card_body(
                       plotOutput(outputId = "KillsPerMemberByTeam", width = "100%"),
                       style = "display: flex; justify-content: center; align-items: stretch; padding: 0px; overflow: hidden; box-sizing: border-box;"
-                  ) 
+                  )
               ),
-                
+
             ),
             layout_column_wrap(
               width = 1,
@@ -146,7 +146,7 @@ navbarPage( # UI ####
                   card_body(
                       plotOutput(outputId = "InfRegular", width = "100%"),
                       style = "display: flex; justify-content: center; align-items: center; padding: 0px; overflow: hidden; box-sizing: border-box;"
-                  ) 
+                  )
               ),
               card(
                   height = 110,
@@ -312,7 +312,7 @@ navbarPage( # UI ####
           )
         ),
         card(
-          height = 315,
+          height = 345,
           full_screen = TRUE,
           id = "flex",
           card_header("Flex"),

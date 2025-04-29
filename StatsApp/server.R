@@ -15,7 +15,7 @@ library(gtExtras)
 source('HLL_Lists.R')
 source('HLL_Functions.R')
 
-data_csv <- read_csv("../GAMES/BOTN_SYN_GAME.csv",
+data_csv <- read_csv("../GAMES/BOTN_VNGD_GAME_04-06-2025.csv",
                      col_types = cols(
                          `Player ID` = col_character(),
                      )) %>%
@@ -29,7 +29,7 @@ Master_csv <- read_csv("../BOTN Master Roster/вит Rosters - MASTER ROSTER.csv
     drop_na(Steam64) %>%
     rename("Roster_Name" = "Name:")
 
-roster_csv <- read_csv("../ROSTERS/BOTN_SYN_ROSTER.csv")
+roster_csv <- read_csv("../ROSTERS/BOTN_RONIN_VNGD_ROSTER_04-06-25.csv")
 
 # Define server logic required to draw a histogram
 function(input, output, session) {
@@ -123,10 +123,10 @@ function(input, output, session) {
 
     team <- full_join(team_d, team_k, by = "Player ID") %>%
         mutate(team = factor(case_when(
-            is.na(team_d) & is.na(team_k) ~ NA_character_,
             !is.na(team_d) & is.na(team_k) ~ team_d,
             is.na(team_d) & !is.na(team_k) ~ team_k,
             team_d == team_k ~ team_d,
+            is.na(team_d) & is.na(team_k) ~ "ALLIES",
             TRUE ~ NA
         ))) %>%
         select(`Player ID`, team)
@@ -219,7 +219,7 @@ function(input, output, session) {
 
     # KD Calculations
     KD_Kills <- KillCategorySummary %>%
-        pivot_wider(names_from = WeaponCategory, values_from = Kills, values_fill = 0)
+        pivot_wider(names_from = WeaponCategory, values_from = Kills, values_fill = 0) %>% drop_na()
 
 
     AXIS_KD <- calculate_kd(rowSums(KD_Kills[KD_Kills$team == "AXIS", -1]), rowSums(KD_Kills[KD_Kills$team == "ALLIES", -1]))
@@ -314,7 +314,7 @@ function(input, output, session) {
                 TRUE ~ NA_character_ # Explicit NA character
             )
         ) %>%
-        drop_na(Assignment) %>% # Keep drop_na at the end for clarity after assignment
+        #drop_na(Assignment) %>% # Keep drop_na at the end for clarity after assignment
         mutate(`Adj K/D` = ifelse(`Deaths (Inf)`!=0, round(Kills/`Deaths (Inf)`,2), `K/D`),
                `% Shells` = round((`Deaths (Arty)` + `Deaths (Armor)`) / Deaths, 3))
 
@@ -452,7 +452,7 @@ function(input, output, session) {
 
     ## Game Info ####
     output$game_info_card <- renderUI({
-        Date <- "3/15/2025" # Static Date (replace with your actual date object)
+        Date <- "3/23/2025" # Static Date (replace with your actual date object)
         TeamName <- "BOTN" # Static Team Name
         outcome_text <- input$game_outcome
         team_side <- GameInfo[["Side"]]
@@ -461,7 +461,7 @@ function(input, output, session) {
         game_date <- Date
 
         # Determine opponent's side dynamically
-        opponent_side <- if (team_side == "AXIS") "Allies" else "Axis"
+        opponent_side <- if (team_side == "Axis") "Allies" else "Axis"
 
         # Determine Win/Loss color
         outcome_parts <- strsplit(outcome_text, " - ")[[1]]
@@ -492,7 +492,7 @@ function(input, output, session) {
 
     output$BOTNKD <- renderUI({
         value <- req(AXIS_KD)
-        team <- "SYN"
+        team <- "BOTN"
         red <- 255 * (1 - (value / 1.5)) # Directly use value/2
         green <- 255 * (value / 1.5)     # Directly use value/2
         text_color <- sprintf("rgb(%s, %s, 0)", red, green)
@@ -506,7 +506,7 @@ function(input, output, session) {
     ### Opp KD ####
     output$opponentKD <- renderUI({
         value <- req(ALLIES_KD)
-        team <- "BOTN"
+        team <- "PV"
         red <- 255 * (1 - (value / 1.5)) # Directly use value/2
         green <- 255 * (value / 1.5)     # Directly use value/2
         text_color <- sprintf("rgb(%s, %s, 0)", red, green)
@@ -860,7 +860,38 @@ function(input, output, session) {
     ## Div Summary ####
 
     output$divisionPerformance <- render_gt(
-        gt_table_final
+        gt_table_final %>%
+            opt_css(
+                css = "
+            body { /* Or you can target .gt_table for more specific styling */
+              background-color: #2d2d2d;
+              color: white; /* Default text color to white */
+            }
+            .gt_table {
+              background-color: #2d2d2d; /* Ensure table background is gray20 */
+              color: white; /* Ensure table text is white */
+              border: none; /* Optional: Remove default table border if you want */
+            }
+            .gt_table th { /* Style table header cells */
+              color: white; /* Ensure header text is white */
+              background-color: #2d2d2d; /* Ensure header background is gray20 */
+              border-bottom: 1px solid white; /* Optional: White line under headers */
+            }
+            .gt_table td { /* Style table data cells */
+              color: white; /* Ensure data text is white */
+              background-color: #2d2d2d; /* Ensure data background is gray20 */
+              border: none; /* Optional: Remove cell borders if you want */
+            }
+            .gt_table tfoot { /* Style table footer if you have one */
+              color: white;
+              background-color: #2d2d2d;
+            }
+            .gt_table caption { /* Style table caption if you have one */
+              color: white;
+              background-color: #2d2d2d;
+            }
+        "
+            )
     )
 
 
